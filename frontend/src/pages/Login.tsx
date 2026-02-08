@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { login, googleLogin } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -64,6 +65,38 @@ const Login: React.FC = () => {
                         {loading ? 'Logging in...' : 'Sign in'}
                     </button>
                 </form>
+                <div className="mt-6">
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-border"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-surface text-text-secondary">Or continue with</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-center">
+                        <GoogleLogin
+                            onSuccess={async (credentialResponse) => {
+                                if (credentialResponse.credential) {
+                                    try {
+                                        await googleLogin(credentialResponse.credential);
+                                        toast.success('Login successful!');
+                                        navigate('/dashboard');
+                                    } catch (error: any) {
+                                        toast.error(error.message || 'Google login failed');
+                                    }
+                                }
+                            }}
+                            onError={() => {
+                                toast.error('Google Login Failed');
+                            }}
+                            theme="filled_black"
+                            width="100%"
+                        />
+                    </div>
+                </div>
+
                 <div className="mt-6 text-center text-sm">
                     <span className="text-text-secondary">Don't have an account? </span>
                     <Link to="/signup" className="font-medium text-primary hover:text-primary-light transition-colors">

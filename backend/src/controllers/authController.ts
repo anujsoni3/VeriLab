@@ -3,6 +3,105 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { JWTPayload } from '../types/index.js';
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+export const googleLogin = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { credential } = req.body;
+
+        if (!credential) {
+            res.status(400).json({ success: false, error: 'Token is required' });
+            return;
+        }
+
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+
+        if (!payload) {
+            res.status(400).json({ success: false, error: 'Invalid token' });
+            return;
+        }
+
+        const { email, name, picture, sub: googleId } = payload;
+
+        if (!email) {
+            res.status(400).json({ success: false, error: 'Email not found in token' });
+            return;
+        }
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            // Create new user
+            // Generate a random username or use email prefix if available
+            let username = email.split('@')[0];
+            let usernameExists = await User.findOne({ username });
+            const uuid = await import('uuid');
+
+            if (usernameExists) {
+                username = `${username}_${uuid.v4().slice(0, 8)}`;
+            }
+
+            user = await User.create({
+                email,
+                displayName: name || 'User',
+                username,
+                googleId,
+                avatar: picture,
+                college: 'Not Specified',
+                branch: 'Not Specified',
+                password: '', // Dummy password or handled by schema
+                solvedProblems: [],
+                totalPoints: 0,
+                rank: 0,
+            });
+        } else if (!user.googleId) {
+            // Link existing user if they don't have googleId but email matches
+            // Ideally we should ask for password to link, but for now we can just link it 
+            // OR we can just update the googleId.
+            user.googleId = googleId;
+            if (!user.avatar && picture) user.avatar = picture;
+            await user.save();
+        }
+
+        // Generate JWT
+        const token = jwt.sign(
+            { uid: user._id.toString(), email } as JWTPayload,
+            process.env.JWT_SECRET!,
+            { expiresIn: '7d' }
+        );
+
+        res.json({
+            success: true,
+            data: {
+                token,
+                user: {
+                    uid: user._id.toString(),
+                    email: user.email,
+                    displayName: user.displayName,
+                    username: user.username,
+                    college: user.college,
+                    branch: user.branch,
+                    avatar: user.avatar,
+                    solvedProblems: user.solvedProblems,
+                    totalPoints: user.totalPoints,
+                    rank: user.rank,
+                    createdAt: user.createdAt,
+                },
+            },
+        });
+
+    } catch (error) {
+        console.error('Google login error:', error);
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+};
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
     try {

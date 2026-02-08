@@ -11,6 +11,7 @@ export interface IUser extends Document {
     solvedProblems: string[];
     totalPoints: number;
     rank: number;
+    googleId?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -26,7 +27,14 @@ const UserSchema = new Schema<IUser>(
         },
         password: {
             type: String,
-            required: true,
+            required: function (this: IUser) {
+                return !this.googleId;
+            },
+        },
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true,
         },
         displayName: {
             type: String,
@@ -44,11 +52,13 @@ const UserSchema = new Schema<IUser>(
         },
         college: {
             type: String,
-            required: true,
+            required: false,
+            default: "Not Specified"
         },
         branch: {
             type: String,
-            required: true,
+            required: false,
+            default: "Not Specified"
         },
         solvedProblems: {
             type: [String],

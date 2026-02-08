@@ -10,6 +10,7 @@ export interface User {
     solvedProblems: string[];
     totalPoints: number;
     rank: number;
+    googleId?: string;
     createdAt: Date;
     updatedAt: Date;
 }
