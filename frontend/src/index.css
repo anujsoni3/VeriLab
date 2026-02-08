@@ -1,0 +1,128 @@
+@import "tailwindcss";
+@config "../tailwind.config.cjs";
+
+@layer base {
+  :root {
+    /* Light Mode Variables */
+    --color-primary: 99 102 241;
+    /* Indigo 500 */
+    --color-primary-light: 129 140 248;
+    /* Indigo 400 */
+    --color-primary-dark: 79 70 229;
+    /* Indigo 600 */
+    --color-primary-foreground: 255 255 255;
+
+    --color-secondary: 100 116 139;
+    /* Slate 500 */
+    --color-secondary-light: 148 163 184;
+    /* Slate 400 */
+    --color-secondary-dark: 71 85 105;
+    /* Slate 600 */
+
+    --color-background: 248 250 252;
+    /* Slate 50 */
+    --color-background-paper: 255 255 255;
+    /* White */
+    --color-background-subtle: 241 245 249;
+    /* Slate 100 */
+
+    --color-surface: 255 255 255;
+    /* White */
+    --color-surface-hover: 241 245 249;
+    /* Slate 100 */
+    --color-surface-active: 226 232 240;
+    /* Slate 200 */
+
+    --color-success: 16 185 129;
+    --color-error: 239 68 68;
+    --color-warning: 245 158 11;
+    --color-info: 59 130 246;
+
+    --color-border: 226 232 240;
+    /* Slate 200 */
+    --color-border-light: 241 245 249;
+    /* Slate 100 */
+
+    --color-text-primary: 15 23 42;
+    /* Slate 900 */
+    --color-text-secondary: 71 85 105;
+    /* Slate 600 */
+    --color-text-muted: 100 116 139;
+    /* Slate 500 */
+  }
+
+  .dark {
+    /* Dark Mode Variables */
+    --color-primary: 99 102 241;
+    /* Indigo 500 */
+    --color-primary-light: 129 140 248;
+    /* Indigo 400 */
+    --color-primary-dark: 79 70 229;
+    /* Indigo 600 */
+    --color-primary-foreground: 255 255 255;
+
+    --color-secondary: 100 116 139;
+    /* Slate 500 */
+    --color-secondary-light: 148 163 184;
+    /* Slate 400 */
+    --color-secondary-dark: 71 85 105;
+    /* Slate 600 */
+
+    --color-background: 2 6 23;
+    /* Slate 950 */
+    --color-background-paper: 15 23 42;
+    /* Slate 900 */
+    --color-background-subtle: 30 41 59;
+    /* Slate 800 */
+
+    --color-surface: 15 23 42;
+    /* Slate 900 */
+    --color-surface-hover: 30 41 59;
+    /* Slate 800 */
+    --color-surface-active: 51 65 85;
+    /* Slate 700 */
+
+    --color-border: 30 41 59;
+    /* Slate 800 */
+    --color-border-light: 51 65 85;
+    /* Slate 700 */
+
+    --color-text-primary: 248 250 252;
+    /* Slate 50 */
+    --color-text-secondary: 148 163 184;
+    /* Slate 400 */
+    --color-text-muted: 100 116 139;
+    /* Slate 500 */
+  }
+
+  body {
+    @apply bg-background text-text-primary antialiased transition-colors duration-300;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary-dark;
+  }
+
+  .btn-secondary {
+    @apply bg-surface text-text-primary hover:bg-surface-hover border border-border;
+  }
+
+  .btn-ghost {
+    @apply hover:bg-surface-hover text-text-secondary hover:text-text-primary;
+  }
+
+  .card {
+    @apply bg-surface border border-border rounded-xl;
+  }
+
+  .input {
+    @apply flex h-10 w-full rounded-md border border-border bg-background-paper px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+}
