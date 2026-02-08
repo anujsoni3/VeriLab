@@ -21,8 +21,9 @@ const Navbar: React.FC = () => {
     const navLinks = [
         { path: '/dashboard', label: 'Dashboard' },
         { path: '/problems', label: 'Problems' },
-        { path: '/leaderboard', label: 'Leaderboard' },
+        { path: '/leadersboard', label: 'Leaderboard' },
         { path: '/quizzes', label: 'Quizzes' },
+        { path: '/contests', label: 'Contests' },
     ];
 
     if (!isAuthenticated) return null;

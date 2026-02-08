@@ -104,6 +104,38 @@ export interface SignupData {
     branch: string;
 }
 
+// Contest Types
+export interface Contest {
+    _id: string; // Using _id to match backend
+    title: string;
+    description: string;
+    startTime: string; // Dates over JSON are strings
+    endTime: string;
+    problems: {
+        problemId: string | Problem; // Can be populated
+        points: number;
+    }[];
+    participants: string[];
+    createdBy: string;
+    status: 'upcoming' | 'active' | 'ended';
+    createdAt: string;
+}
+
+export interface ContestParticipant {
+    _id: string;
+    contestId: string;
+    userId: string | User;
+    score: number;
+    finishTime: string | null;
+    submissions: {
+        [problemId: string]: {
+            status: 'pending' | 'accepted' | 'rejected';
+            attempts: number;
+            solvedAt: string | null;
+        };
+    };
+}
+
 // API Response types
 export interface ApiResponse<T> {
     success: boolean;

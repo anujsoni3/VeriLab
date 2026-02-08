@@ -16,6 +16,8 @@ import ProblemDetail from './pages/ProblemDetail';
 import Leaderboard from './pages/Leaderboard';
 import Quizzes from './pages/Quizzes';
 import QuizDetail from './pages/QuizDetail';
+import Contests from './pages/Contests'; // Added
+import ContestDetail from './pages/ContestDetail'; // Added
 import Profile from './pages/Profile';
 
 // Protected Route wrapper
@@ -90,6 +92,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <QuizDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/contests"
+                element={
+                  <ProtectedRoute>
+                    <Contests />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/contests/:id"
+                element={
+                  <ProtectedRoute>
+                    <ContestDetail />
                   </ProtectedRoute>
                 }
               />

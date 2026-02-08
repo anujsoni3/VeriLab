@@ -4,6 +4,9 @@ import Problem from '../models/Problem.js';
 import User from '../models/User.js';
 
 import { compileAndRun } from '../services/compilerService.js';
+import Contest from '../models/Contest.js';
+import ContestParticipant from '../models/ContestParticipant.js';
+import { io } from '../server.js';
 
 export const submitCode = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -52,7 +55,7 @@ export const submitCode = async (req: Request, res: Response): Promise<void> => 
 
         // Create submission
         const submission = await Submission.create({
-            userId: req.user.uid,
+            userId: req.user!.uid,
             problemId,
             code,
             status: submissionStatus,
@@ -69,14 +72,70 @@ export const submitCode = async (req: Request, res: Response): Promise<void> => 
 
         // Update user stats if accepted
         if (submissionStatus === 'accepted') {
-            const user = await User.findById(req.user.uid);
+            const user = await User.findById(req.user!.uid);
             if (user && !user.solvedProblems.includes(problemId)) {
-                await User.findByIdAndUpdate(req.user.uid, {
+                await User.findByIdAndUpdate(req.user!.uid, {
                     $inc: { totalPoints: pointsEarned },
                     $push: { solvedProblems: problemId }
                 });
             }
         }
+
+        // --- CONTEST LOGIC START ---
+        // Check if this problem is part of an active contest
+        const activeContest = await Contest.findOne({
+            'problems.problemId': problemId,
+            status: 'active',
+            startTime: { $lte: new Date() },
+            endTime: { $gte: new Date() }
+        });
+
+        if (activeContest) {
+            const userId = req.user!.uid;
+            let participant = await ContestParticipant.findOne({ contestId: activeContest._id, userId });
+
+            if (participant) {
+                const problemConfig = activeContest.problems.find(p => p.problemId.toString() === problemId);
+                const problemPoints = problemConfig ? problemConfig.points : 0;
+
+                // Initialize submission entry if not exists
+                if (!participant.submissions.get(problemId)) {
+                    participant.submissions.set(problemId, {
+                        status: 'pending',
+                        attempts: 0,
+                        solvedAt: null
+                    });
+                }
+
+                const subEntry = participant.submissions.get(problemId)!;
+
+                // Only update if not already accepted (or maybe allow improvement? usually CP doesn't allow point increase after accept)
+                if (subEntry.status !== 'accepted') {
+                    subEntry.attempts += 1;
+                    subEntry.status = submissionStatus;
+
+                    if (submissionStatus === 'accepted') {
+                        subEntry.solvedAt = new Date();
+                        participant.score += problemPoints;
+                        // Time penalty could be implementation here: (ActiveTime - StartTime) + (Attempts * 20min)
+                        // For now, just adding points.
+                        participant.finishTime = new Date();
+                    }
+
+                    participant.submissions.set(problemId, subEntry);
+                    await participant.save();
+
+                    // Emit real-time update
+                    io.to(activeContest._id.toString()).emit('leaderboard_update', {
+                        contestId: activeContest._id,
+                        userId,
+                        score: participant.score,
+                        participant // Send full participant object or tailored one
+                    });
+                }
+            }
+        }
+        // --- CONTEST LOGIC END ---
 
         res.status(201).json({
             success: true,

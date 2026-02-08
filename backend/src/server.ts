@@ -18,7 +18,11 @@ import { authMiddleware } from './middleware/auth.js';
 
 dotenv.config();
 
+import { Server } from 'socket.io';
+import http from 'http';
+
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -27,9 +31,35 @@ app.use(cors());
 app.use(express.json());
 app.use(rateLimiter);
 
+// Socket.io Setup
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"]
+    }
+});
+
+export { io };
+
+io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+
+    socket.on('join_contest', (contestId) => {
+        socket.join(contestId);
+        console.log(`User ${socket.id} joined contest ${contestId}`);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
+
+import contestRoutes from './routes/contest.js';
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/problems', problemRoutes);
+app.use('/api/contests', contestRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/simulation', simulationRoutes);
 app.get('/api/leaderboard', getLeaderboard);
@@ -52,12 +82,12 @@ const startServer = async () => {
     try {
         await connectDatabase();
 
-        app.listen(PORT, () => {
-            logger.info(`🚀 Server running on port ${PORT}`);
-            logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+        server.listen(PORT, () => {
+            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
         });
     } catch (error) {
-        logger.error('Failed to start server:', error);
+        console.error('Failed to start server:', error);
         process.exit(1);
     }
 };
