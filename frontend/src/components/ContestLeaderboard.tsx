@@ -31,7 +31,7 @@ const ContestLeaderboard: React.FC<ContestLeaderboardProps> = ({ contestId }) =>
 
         socket.emit('join_contest', contestId);
 
-        socket.on('leaderboard_update', (data: { contestId: string, userId: string, score: number, participant: ContestParticipant }) => {
+        socket.on('leaderboard_update', () => {
             // Re-fetch or update locally. Re-fetching is safer for sorting but heavier.
             // For now, let's re-fetch to ensure correct sorting and data consistency
             fetchLeaderboard();

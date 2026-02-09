@@ -19,6 +19,9 @@ import QuizDetail from './pages/QuizDetail';
 import Contests from './pages/Contests'; // Added
 import ContestDetail from './pages/ContestDetail'; // Added
 import Profile from './pages/Profile';
+import Subjects from './pages/Subjects'; // Added
+import Chapters from './pages/Chapters'; // Added
+import Learning from './pages/Learning'; // Added
 
 // Protected Route wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -108,6 +111,30 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ContestDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/subjects"
+                element={
+                  <ProtectedRoute>
+                    <Subjects />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/subjects/:id"
+                element={
+                  <ProtectedRoute>
+                    <Chapters />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/learning/:chapterId"
+                element={
+                  <ProtectedRoute>
+                    <Learning />
                   </ProtectedRoute>
                 }
               />
