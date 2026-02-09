@@ -60,6 +60,8 @@ import contestRoutes from './routes/contest.js';
 app.use('/api/auth', authRoutes);
 app.use('/api/problems', problemRoutes);
 app.use('/api/contests', contestRoutes);
+import learningRoutes from './routes/learningRoutes.js';
+app.use('/api/learning', learningRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/simulation', simulationRoutes);
 app.get('/api/leaderboard', getLeaderboard);

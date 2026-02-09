@@ -4,7 +4,8 @@ import {
     getContests,
     getContestById,
     registerForContest,
-    getContestLeaderboard
+    getContestLeaderboard,
+    getMyContestParticipation
 } from '../controllers/contestController.js';
 import { authMiddleware } from '../middleware/auth.js';
 
@@ -14,6 +15,7 @@ router.post('/', authMiddleware, createContest);
 router.get('/', getContests);
 router.get('/:id', getContestById);
 router.post('/:id/register', authMiddleware, registerForContest);
+router.get('/:id/participation', authMiddleware, getMyContestParticipation);
 router.get('/:id/leaderboard', getContestLeaderboard);
 
 export default router;

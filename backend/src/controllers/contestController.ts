@@ -103,3 +103,22 @@ export const getContestLeaderboard = async (req: Request, res: Response) => {
         res.status(500).json({ success: false, error: 'Server error' });
     }
 };
+
+// Get My Participation
+export const getMyContestParticipation = async (req: Request, res: Response) => {
+    try {
+        const contestId = req.params.id;
+        const userId = req.user!.uid;
+
+        const participant = await ContestParticipant.findOne({ contestId, userId });
+
+        if (!participant) {
+            return res.status(404).json({ success: false, error: 'Not participating' });
+        }
+
+        res.json({ success: true, data: participant });
+    } catch (error) {
+        console.error('Get participation error:', error);
+        res.status(500).json({ success: false, error: 'Server error' });
+    }
+};
