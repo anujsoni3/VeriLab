@@ -29,7 +29,7 @@ export interface Chapter {
 export interface Stage {
     _id: string;
     title: string;
-    type: 'theory' | 'practice' | 'quiz' | 'problem';
+    type: 'theory' | 'practice' | 'quiz' | 'problem' | 'simulation';
     chapterId: string;
     order: number;
     content?: string;
@@ -40,4 +40,8 @@ export interface Stage {
     xpPoints: number;
     isCompleted?: boolean; // For UI
     isLocked?: boolean; // For UI
+    simulationConfig?: {
+        type: 'logic-gate' | 'combinational';
+        defaultProps?: any; // Initial state or configuration
+    };
 }

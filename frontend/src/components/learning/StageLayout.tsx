@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Menu, X, ChevronLeft, ChevronRight, CheckCircle, Lock,
+    FileText, Code, HelpCircle, Cpu,
     Maximize2, Minimize2
 } from 'lucide-react';
 import { Stage } from '../../types/learning';
@@ -56,9 +57,9 @@ const StageLayout: React.FC<StageLayoutProps> = ({
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: -250, opacity: 0 }}
                         className={`
-              fixed md:relative z - 40 h - full w - 64 bg - surface border - r border - border flex flex - col
-              ${!isSidebarOpen && 'hidden md:flex'}
-`}
+                            fixed md:relative z-40 h-full w-64 bg-surface border-r border-border flex flex-col
+                            ${!isSidebarOpen && 'hidden md:flex'}
+                        `}
                     >
                         <div className="p-4 border-b border-border flex justify-between items-center">
                             <h2 className="font-bold text-lg truncate" title={chapterTitle}>
@@ -75,7 +76,7 @@ const StageLayout: React.FC<StageLayoutProps> = ({
                                 const isCompleted = idx < currentStageIdx; // Simplification for now
                                 const isLocked = idx > currentStageIdx; // Simplification
 
-                                // const Icon = stage.type === 'practice' ? Code : stage.type === 'quiz' ? HelpCircle : stage.type === 'problem' ? CheckCircle : FileText;
+                                const Icon = stage.type === 'practice' ? Code : stage.type === 'quiz' ? HelpCircle : stage.type === 'simulation' ? Cpu : FileText;
 
                                 return (
                                     <button
@@ -83,22 +84,22 @@ const StageLayout: React.FC<StageLayoutProps> = ({
                                         onClick={() => !isLocked && onStageSelect(idx)}
                                         disabled={isLocked}
                                         className={`
-w - full px - 4 py - 3 flex items - center gap - 3 transition - colors text - left
-                      ${isActive ? 'bg-primary/10 border-r-4 border-primary' : 'hover:bg-surface-hover'}
-                      ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-`}
+                                            w-full px-4 py-3 flex items-center gap-3 transition-colors text-left
+                                            ${isActive ? 'bg-primary/10 border-r-4 border-primary' : 'hover:bg-surface-hover'}
+                                            ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                                        `}
                                     >
                                         <div className={`
-flex - shrink - 0 w - 6 h - 6 rounded - full flex items - center justify - center text - xs
-                      ${isActive ? 'bg-primary text-white' :
+                                            flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs
+                                            ${isActive ? 'bg-primary text-white' :
                                                 isCompleted ? 'bg-success text-white' :
                                                     'bg-border text-text-secondary'
                                             }
-`}>
-                                            {isCompleted ? <CheckCircle size={14} /> : isLocked ? <Lock size={12} /> : idx + 1}
+                                        `}>
+                                            {isCompleted ? <CheckCircle size={14} /> : isLocked ? <Lock size={12} /> : <Icon size={14} />}
                                         </div>
                                         <div className="flex-grow min-w-0">
-                                            <p className={`text - sm font - medium truncate ${isActive ? 'text-primary' : 'text-text-primary'} `}>
+                                            <p className={`text-sm font-medium truncate ${isActive ? 'text-primary' : 'text-text-primary'}`}>
                                                 {stage.title}
                                             </p>
                                             <span className="text-xs text-text-secondary capitalize">{stage.type}</span>
@@ -144,7 +145,7 @@ flex - shrink - 0 w - 6 h - 6 rounded - full flex items - center justify - cente
                             <div className="h-2 bg-border rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-primary transition-all duration-500 ease-out"
-                                    style={{ width: `${progress}% ` }}
+                                    style={{ width: `${progress}%` }}
                                 />
                             </div>
                         </div>
@@ -179,12 +180,12 @@ flex - shrink - 0 w - 6 h - 6 rounded - full flex items - center justify - cente
                         onClick={onPrev}
                         disabled={currentStageIdx === 0}
                         className={`
-              flex items - center gap - 2 px - 4 py - 2 rounded - lg text - sm font - medium transition - colors
-              ${currentStageIdx === 0
+                            flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                            ${currentStageIdx === 0
                                 ? 'text-text-secondary opacity-50 cursor-not-allowed'
                                 : 'text-text-primary hover:bg-surface-hover'
                             }
-`}
+                        `}
                     >
                         <ChevronLeft size={18} />
                         Previous

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import StageLayout from '../components/learning/StageLayout';
 import TheoryStage from '../components/learning/stages/TheoryStage';
 import PracticeStage from '../components/learning/stages/PracticeStage';
+import SimulationStage from '../components/learning/stages/SimulationStage';
 import { Chapter, Stage } from '../types/learning';
 import { learningService } from '../services/learningService';
 
@@ -87,6 +88,8 @@ const Learning: React.FC = () => {
                 return <TheoryStage stage={currentStageData} />;
             case 'practice':
                 return <PracticeStage stage={currentStageData} />;
+            case 'simulation':
+                return <SimulationStage stage={currentStageData} onComplete={handleNext} />;
             case 'quiz':
                 return <div className="p-8 text-center text-text-secondary">Quiz Component Implementation Required</div>; // Placeholder
             case 'problem':
