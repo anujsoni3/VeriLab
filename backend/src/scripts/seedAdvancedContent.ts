@@ -1,10 +1,9 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import Subject from '../models/Subject';
-import Chapter from '../models/Chapter';
-import Stage from '../models/Stage';
-import Problem from '../models/Problem';
-import Quiz from '../models/Quiz';
+import Subject from '../models/Subject.js';
+import Chapter from '../models/Chapter.js';
+import Stage from '../models/Stage.js';
+
 
 dotenv.config();
 

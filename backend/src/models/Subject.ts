@@ -7,7 +7,7 @@ export interface ISubject extends Document {
     icon: string; // URL or icon name
     totalChapters: number;
     estimatedHours: number;
-    difficulty: 'Bregginer' | 'Intermediate' | 'Advanced';
+    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
     order: number;
     isPublished: boolean;
     createdAt: Date;
