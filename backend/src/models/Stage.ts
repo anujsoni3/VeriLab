@@ -18,6 +18,7 @@ export interface IStage extends Document {
         type: 'logic-gate' | 'combinational';
         defaultProps?: any;
     };
+    testbench?: string; // For practice/problem stages directly defined
     updatedAt: Date;
 }
 
@@ -35,7 +36,8 @@ const StageSchema: Schema = new Schema({
     simulationConfig: {
         type: { type: String, enum: ['logic-gate', 'combinational'] },
         defaultProps: { type: Object }
-    }
+    },
+    testbench: { type: String },
 }, { timestamps: true });
 
 StageSchema.index({ chapterId: 1, order: 1 }, { unique: true });

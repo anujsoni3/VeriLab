@@ -5,6 +5,7 @@ import api from '../services/api';
 import { Problem, Submission } from '../types';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
+import WaveformViewer from '../components/learning/simulations/WaveformViewer';
 
 const ProblemDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -14,7 +15,7 @@ const ProblemDetail: React.FC = () => {
     const [submitting, setSubmitting] = useState(false);
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [simulating, setSimulating] = useState(false);
-    const [simulationOutput, setSimulationOutput] = useState<{ status: string; output: string } | null>(null);
+    const [simulationOutput, setSimulationOutput] = useState<{ status: string; output: string; vcd?: string } | null>(null);
 
     useEffect(() => {
         if (id) {
@@ -81,7 +82,10 @@ const ProblemDetail: React.FC = () => {
         setSimulating(true);
         setSimulationOutput(null);
         try {
-            const response = await api.post('/simulation/run', { code });
+            const response = await api.post('/simulation/run', {
+                code,
+                problemId: id
+            });
             if (response.data.success) {
                 setSimulationOutput(response.data.data);
                 if (response.data.data.status === 'success') {
@@ -195,7 +199,7 @@ const ProblemDetail: React.FC = () => {
                                 <h3 className="text-xl font-semibold mb-4">Your Submissions</h3>
                                 <div className="space-y-2">
                                     {submissions.slice(0, 5).map((submission) => (
-                                        <div key={submission.id} className="glass p-3 rounded-lg">
+                                        <div key={submission._id || submission.id} className="glass p-3 rounded-lg">
                                             <div className="flex justify-between items-center">
                                                 <div>
                                                     <span className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(submission.status)}`}>
@@ -261,7 +265,7 @@ const ProblemDetail: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex-1 flex flex-col min-h-0">
-                            <div className="flex-1">
+                            <div className="flex-1 min-h-0">
                                 <Editor
                                     height="100%"
                                     defaultLanguage="verilog"
@@ -281,8 +285,8 @@ const ProblemDetail: React.FC = () => {
                             </div>
 
                             {/* Simulation Output Console */}
-                            {simulationOutput && (
-                                <div className="h-48 border-t border-border bg-black/50 overflow-hidden flex flex-col">
+                            {(simulationOutput) && (
+                                <div className={`${simulationOutput.vcd ? 'h-96' : 'h-48'} shrink-0 border-t border-border bg-black/50 overflow-hidden flex flex-col transition-all duration-300`}>
                                     <div className="px-4 py-2 border-b border-white/5 flex justify-between items-center bg-white/5">
                                         <span className="text-xs font-mono text-text-muted uppercase tracking-wider">Console Output</span>
                                         <button
@@ -292,11 +296,19 @@ const ProblemDetail: React.FC = () => {
                                             Close
                                         </button>
                                     </div>
-                                    <div className="flex-1 p-4 overflow-y-auto font-mono text-sm">
-                                        <div className={simulationOutput.status === 'success' ? 'text-green-400' : 'text-red-400'}>
-                                            <span className="font-bold">Status: {simulationOutput.status.toUpperCase()}</span>
+                                    <div className="flex-1 p-4 overflow-y-auto font-mono text-sm flex flex-col gap-4">
+                                        <div>
+                                            <div className={simulationOutput.status === 'success' ? 'text-green-400' : 'text-red-400'}>
+                                                <span className="font-bold">Status: {simulationOutput.status.toUpperCase()}</span>
+                                            </div>
+                                            <pre className="mt-2 text-gray-300 whitespace-pre-wrap font-mono">{simulationOutput.output}</pre>
                                         </div>
-                                        <pre className="mt-2 text-gray-300 whitespace-pre-wrap font-mono">{simulationOutput.output}</pre>
+
+                                        {simulationOutput.vcd && (
+                                            <div className="flex-grow min-h-[300px] border-t border-white/10 pt-4">
+                                                <WaveformViewer vcdData={simulationOutput.vcd} />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { Stage } from '../../../types/learning';
 import { Play, RotateCcw, Check, Sparkles } from 'lucide-react';
+import { learningService } from '../../../services/learningService';
+import WaveformViewer from '../simulations/WaveformViewer';
 
 interface PracticeStageProps {
     stage: Stage;
@@ -10,25 +12,40 @@ interface PracticeStageProps {
 const PracticeStage: React.FC<PracticeStageProps> = ({ stage }) => {
     const [code, setCode] = useState(stage.codeSnippet || '// Write your code here');
     const [output, setOutput] = useState<string | null>(null);
+    const [vcdData, setVcdData] = useState<string | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
-    const handleRun = () => {
+    const handleRun = async () => {
         setIsRunning(true);
         setOutput(null);
+        setVcdData(null);
         setIsSuccess(false);
 
-        // Mock execution simulation
-        setTimeout(() => {
+        try {
+            const result = await learningService.simulateCode(
+                code,
+                stage.problemId ? stage.problemId.toString() : undefined,
+                stage._id ? stage._id.toString() : undefined
+            );
+            setOutput(result.output);
+            if (result.status === 'success') {
+                setIsSuccess(true);
+                if (result.vcd) {
+                    setVcdData(result.vcd);
+                }
+            }
+        } catch (error: any) {
+            setOutput(`Error: ${error.response?.data?.error || error.message}`);
+        } finally {
             setIsRunning(false);
-            setOutput('Compilation successful.\nSimulation started...\n\nResult: 4-bit Counter output: 0000 -> 0001 -> 0010...\n\nTestbench: PASS');
-            setIsSuccess(true);
-        }, 1500);
+        }
     };
 
     const handleReset = () => {
         setCode(stage.codeSnippet || '');
         setOutput(null);
+        setVcdData(null);
         setIsSuccess(false);
     };
 
@@ -110,9 +127,9 @@ const PracticeStage: React.FC<PracticeStageProps> = ({ stage }) => {
                 <div className={`
              transition-all duration-300 rounded-xl border border-border p-4
              ${isSuccess ? 'bg-green-500/5 border-green-500/20' : 'bg-surface'}
-             ${output ? 'h-48' : 'h-16 flex items-center justify-end'}
+             ${output || vcdData ? 'h-96' : 'h-16 flex items-center justify-end'}
         `}>
-                    {!output ? (
+                    {!output && !vcdData ? (
                         <button
                             onClick={handleRun}
                             disabled={isRunning}
@@ -131,7 +148,7 @@ const PracticeStage: React.FC<PracticeStageProps> = ({ stage }) => {
                             )}
                         </button>
                     ) : (
-                        <div className="h-full flex flex-col">
+                        <div className="h-full flex flex-col gap-4">
                             <div className="flex justify-between items-start mb-2">
                                 <span className="text-xs font-semibold text-text-secondary uppercase">Console Output</span>
                                 {isSuccess && (
@@ -140,9 +157,27 @@ const PracticeStage: React.FC<PracticeStageProps> = ({ stage }) => {
                                     </span>
                                 )}
                             </div>
-                            <pre className="flex-grow overflow-y-auto font-mono text-xs md:text-sm text-gray-300 whitespace-pre-wrap">
-                                {output}
-                            </pre>
+
+                            <div className="flex-1 overflow-hidden flex flex-col gap-4">
+                                <pre className="flex-grow overflow-y-auto font-mono text-xs md:text-sm text-gray-300 whitespace-pre-wrap max-h-40 border-b border-white/10 pb-4">
+                                    {output}
+                                </pre>
+
+                                {vcdData && (
+                                    <div className="flex-grow h-1/2 min-h-0">
+                                        <WaveformViewer vcdData={vcdData} />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex justify-end pt-2">
+                                <button
+                                    onClick={() => { setOutput(null); setVcdData(null); setIsSuccess(false); }}
+                                    className="text-xs text-text-secondary hover:text-white underline"
+                                >
+                                    Clear Output
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

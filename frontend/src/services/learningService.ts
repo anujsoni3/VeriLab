@@ -1,33 +1,35 @@
-import axios from 'axios';
+import api from './api';
 import { Subject, Chapter, Stage } from '../types/learning';
-
-// Assuming API URL is configured in axios instance or we use relative path with proxy
-const API_URL = 'http://localhost:5000/api/learning';
-
-// Add token to requests if needed, usually handled by interceptors in a real app
-const getAuthHeader = () => {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-};
 
 export const learningService = {
     getSubjects: async (): Promise<Subject[]> => {
-        const response = await axios.get(`${API_URL}/subjects`);
+        const response = await api.get('/learning/subjects');
         return response.data;
     },
 
     getSubject: async (id: string): Promise<{ subject: Subject; chapters: Chapter[] }> => {
-        const response = await axios.get(`${API_URL}/subjects/${id}`);
+        const response = await api.get(`/learning/subjects/${id}`);
         return response.data;
     },
 
     getChapter: async (id: string): Promise<{ chapter: Chapter; stages: Stage[] }> => {
-        const response = await axios.get(`${API_URL}/chapters/${id}`, { headers: getAuthHeader() });
+        const response = await api.get(`/learning/chapters/${id}`);
         return response.data;
     },
 
     getStage: async (id: string): Promise<Stage> => {
-        const response = await axios.get(`${API_URL}/stages/${id}`, { headers: getAuthHeader() });
+        const response = await api.get(`/learning/stages/${id}`);
         return response.data;
+    },
+
+    simulateCode: async (code: string, problemId?: string, stageId?: string): Promise<{ status: string; output: string; vcd?: string }> => {
+        const payload: any = { code };
+        if (problemId) payload.problemId = problemId;
+        if (stageId) payload.stageId = stageId;
+
+        const response = await api.post('/simulation/run', payload);
+        // The backend returns { success: true, data: { ... } }
+        // api.ts interceptor returns response, which is the axios response.
+        return response.data.data;
     }
 };

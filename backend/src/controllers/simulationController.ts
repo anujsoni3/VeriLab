@@ -1,38 +1,53 @@
 import { Request, Response } from 'express';
+import { compileAndRun } from '../services/compilerService.js';
+import Problem from '../models/Problem.js';
+import Stage from '../models/Stage.js';
 
 export const simulateCode = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { code } = req.body;
+        const { code, problemId, stageId } = req.body;
 
         if (!code) {
             res.status(400).json({ success: false, error: 'Code is required' });
             return;
         }
 
-        // TODO: Integrate with actual Verilog compiler (e.g., Icarus Verilog or Verilator)
-        // For now, we perform basic syntax checks to mock the behavior.
+        let testbench = '';
 
-        const hasModule = code.includes('module');
-        const hasEndModule = code.includes('endmodule');
+        // 1. Try to get testbench from Problem
+        if (problemId) {
+            const problem = await Problem.findById(problemId);
+            if (problem && problem.testbench) {
+                testbench = problem.testbench;
+            }
+        }
 
-        if (!hasModule || !hasEndModule) {
-            res.json({
-                success: true,
-                data: {
-                    status: 'error',
-                    output: 'Syntax Error: Missing "module" or "endmodule" keyword.',
-                },
-            });
+        // 2. If not found, try to get from Stage
+        if (!testbench && stageId) {
+            const stage = await Stage.findById(stageId);
+            if (stage && stage.testbench) {
+                testbench = stage.testbench;
+            }
+        }
+
+        // 3. If explicit testbench provided in request (less secure, but useful for testing/custom simulation)
+        if (!testbench && req.body.testbench) {
+            testbench = req.body.testbench;
+        }
+
+        if (!testbench) {
+            res.status(400).json({ success: false, error: 'No testbench found for this problem.' });
             return;
         }
 
-        // Mock successful simulation
-        // In a real implementation, this would run the code against a testbench.
+        const result = await compileAndRun(code, testbench, true);
+
         res.json({
             success: true,
             data: {
-                status: 'success',
-                output: 'Build successful.\nSimulation completed with 0 errors.\n\nTestbench results:\n[PASS] Test Case 1\n[PASS] Test Case 2',
+                status: result.success ? 'success' : 'error',
+                output: result.output,
+                vcd: result.vcd
             },
         });
     } catch (error) {

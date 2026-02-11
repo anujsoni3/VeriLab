@@ -37,6 +37,7 @@ export interface Problem {
 export type SubmissionStatus = 'pending' | 'accepted' | 'rejected';
 
 export interface Submission {
+    _id?: string;
     id: string;
     userId: string;
     problemId: string;
